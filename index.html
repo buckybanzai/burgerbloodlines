@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Family Baseball">
+<meta name="theme-color" content="#2d5a27">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="icon" href="assets/icon.png">
+<title>Burger Family Baseball</title>
+<style>
+  :root{
+    --ink:#14213d; --ink-2:#4a5568; --muted:#8a94a6; --line:rgba(20,33,61,.08);
+    --bg:#eef2f8; --card:#fff;
+    --iu:#990000; --occ:#1f3a68; --x:#111;
+    --radius:22px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#eef2f6;
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+  @font-face{font-family:"Bowlby One";src:url("assets/BowlbyOne.ttf") format("truetype");font-display:swap}
+  .hero{position:relative;height:clamp(337px,90vw,398px);background:#2d5a27 url("assets/hero.jpg") center center/cover no-repeat;
+    color:#fff;overflow:hidden}
+  .hero.night{background-image:url("assets/hero-night.jpg")}
+  .hero::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(10,20,40,.45) 0%,rgba(10,20,40,.15) 40%,rgba(10,20,40,0) 60%,rgba(10,20,40,.3) 100%)}
+  .hero .in{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 18px);z-index:1;max-width:560px;margin:0 auto;padding:0 20px}
+  .hero h1{margin:0;font-family:"Bowlby One",Impact,"Arial Black",sans-serif;font-weight:400;
+    font-size:clamp(32px,9.6vw,50px);line-height:.95;letter-spacing:.5px;text-transform:uppercase;
+    text-shadow:0 3px 18px rgba(0,0,0,.35)}
+  .hero .tag2{margin-top:6px;font-weight:600;font-size:15px;opacity:.95;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+  .sheet{position:relative;z-index:2;margin-top:-28px;border-radius:28px 28px 0 0;min-height:60vh;
+    background:
+      radial-gradient(110% 45% at 0% 8%, rgba(31,58,104,.20) 0%, transparent 62%),
+      radial-gradient(110% 45% at 100% 30%, rgba(153,0,0,.13) 0%, transparent 62%),
+      radial-gradient(110% 45% at 0% 62%, rgba(31,58,104,.15) 0%, transparent 62%),
+      radial-gradient(110% 45% at 100% 92%, rgba(153,0,0,.11) 0%, transparent 62%),
+      linear-gradient(180deg,#eef2f8 0%,#f4f1f3 100%);
+    box-shadow:0 -1px 0 rgba(255,255,255,.7) inset, 0 -8px 30px rgba(10,20,40,.18)}
+  nav{display:flex;gap:6px;border-radius:999px;padding:4px;margin:0 0 4px;
+    background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 4px 16px rgba(20,33,61,.06)}
+  nav button{flex:1;background:none;border:2px solid transparent;color:var(--ink-2);font:inherit;font-weight:700;font-size:14px;
+    padding:10px 0;border-radius:999px;cursor:pointer}
+  nav button.on{color:var(--ink);
+    background:linear-gradient(#fafbfd,#fafbfd) padding-box,
+               linear-gradient(90deg,#1f3a68,#990000) border-box;
+    box-shadow:0 4px 12px rgba(20,33,61,.10)}
+  .updated{text-align:center;font-size:12px;color:var(--muted);margin:8px 0 2px}
+  section.view{display:none;padding-top:14px}
+  section.view.on{display:block}
+  .card{border-radius:var(--radius);padding:16px;margin-bottom:12px;
+    background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(255,255,255,.52));
+    -webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow:0 8px 24px rgba(20,33,61,.07), 0 1px 0 rgba(255,255,255,.9) inset}
+  .card h2{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  /* player cards */
+  .player{display:flex;gap:14px;align-items:center}
+  .photo{width:84px;height:84px;border-radius:50%;border:3px solid var(--team);box-shadow:0 6px 16px rgba(20,33,61,.18),0 0 0 4px rgba(255,255,255,.7);flex:none;background:#e9ecf2 center/cover no-repeat;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:#9aa3b5;position:relative}
+  .logo{position:absolute;right:-6px;bottom:-6px;width:34px;height:34px;border-radius:50%;
+    background:#fff center/68% auto no-repeat;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .pinfo{flex:1;min-width:0}
+  .pname{font-size:20px;font-weight:900;letter-spacing:-.2px;line-height:1.15}
+  .pmeta{font-size:13px;color:var(--ink-2);margin:2px 0 10px}
+  .pmeta b{color:var(--team)}
+  .statrow{display:flex;gap:6px}
+  .stat{flex:1;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(230,236,244,.55));border:1px solid rgba(255,255,255,.8);padding:6px 4px;text-align:center}
+  .stat .v{font-weight:800;font-size:16px}
+  .stat .l{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  /* lists */
+  .who{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--team);margin:2px 0 6px}
+  .block+.block{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .game .top{font-weight:700}
+  .game .meta{font-size:13px;color:var(--ink-2)}
+  .empty{font-size:14px;color:var(--muted)}
+  .line{font-size:13px;color:var(--ink-2);margin-top:2px}
+  .res{display:inline-block;font-weight:800;font-size:12px;padding:1px 7px;border-radius:6px;margin-right:6px;color:#fff;background:var(--muted)}
+  .res.W{background:#2f855a}.res.L{background:#c53030}
+  .prev+.prev{margin-top:10px}
+  /* media */
+  .post{padding:12px 0;border-top:1px solid var(--line)}
+  .post:first-of-type{border-top:0;padding-top:0}
+  .phead{display:flex;align-items:center;gap:8px;font-size:13px}
+  .badge{font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:1px 6px}
+  .badge.x{background:var(--x)} .badge.news{background:#2b6cb0} .badge.grok{background:#553c9a}
+  .phead .acct{font-weight:700}
+  .phead .date{margin-left:auto;color:var(--muted);white-space:nowrap}
+  .ptext{margin:6px 0 4px;white-space:pre-line}
+  .tag{font-size:11px;font-weight:700;color:var(--team)}
+  a{color:#2b6cb0;text-decoration:none;font-size:13px;font-weight:600}
+  /* tables */
+  .seg{display:flex;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:4px;margin-bottom:12px;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+  .seg button{flex:1;border:0;background:none;padding:8px;border-radius:999px;font:inherit;font-weight:700;color:var(--ink-2);cursor:pointer}
+  .seg button.on{color:var(--team);background:color-mix(in srgb,var(--tint,var(--team)) 16%,#fff);
+    box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--team) 35%,transparent),0 2px 8px color-mix(in srgb,var(--team) 15%,transparent)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;padding:6px 4px;border-bottom:1px solid var(--line)}
+  td{padding:8px 4px;}
+  td:first-child{white-space:nowrap}
+  td{border-bottom:1px solid var(--line);vertical-align:top}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tr.past td{color:var(--muted)}
+  tr.next td{background:color-mix(in srgb,var(--team) 9%,rgba(255,255,255,.6))}
+  tr.next td:first-child{box-shadow:inset 3px 0 0 var(--team);font-weight:700;color:var(--team)}
+  tr.next td b{color:var(--team)}
+  .scroll{overflow-x:auto}
+  .monthhdr td{background:rgba(20,33,61,.04);font-weight:800;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-2)}
+  .modebar{display:flex;justify-content:flex-end;margin:-4px 0 10px}
+  .mode{display:inline-flex;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:3px;
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+  .mode button{border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink-2);padding:6px 14px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .mode button.on{color:var(--ink);background:#fff;box-shadow:0 1px 4px rgba(20,33,61,.12)}
+  .mode svg{width:14px;height:14px}
+  .calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .calhead .m{font-weight:900;font-size:17px}
+  .calhead button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(20,33,61,.08);background:rgba(255,255,255,.7);font-size:18px;color:var(--ink);cursor:pointer}
+  .calhead button:disabled{opacity:.3;cursor:default}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+  .grid .dow{font-size:10px;font-weight:700;letter-spacing:.6px;color:var(--muted);padding-bottom:4px}
+  .day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:14px;font-weight:600;color:var(--ink-2);border:0;background:none;font-family:inherit;padding:0}
+  .day.blank{visibility:hidden}
+  .day.game{background:color-mix(in srgb,var(--tint,var(--team)) 16%,#fff);color:var(--team);font-weight:800;cursor:pointer}
+  .day.past.game{opacity:.55}
+  .day.next{box-shadow:inset 0 0 0 2px var(--team)}
+  .day.sel{background:var(--team);color:#fff;opacity:1}
+  .day .dh{position:absolute;top:3px;right:5px;font-size:9px;font-weight:800}
+  .day .r{position:absolute;bottom:2px;left:0;right:0;font-size:8px;font-weight:800;letter-spacing:.3px}
+  .day.today::after{content:"";position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--ink)}
+  .seg button.on[data-id=both]{color:var(--ink);
+    background:linear-gradient(90deg,color-mix(in srgb,#2f6bd0 16%,#fff),color-mix(in srgb,#990000 16%,#fff));
+    box-shadow:inset 0 0 0 1.5px rgba(20,33,61,.18),0 2px 8px rgba(20,33,61,.1)}
+  .day.multi{background:rgba(20,33,61,.06);color:var(--ink);font-weight:800}
+  .day.multi.sel{background:var(--ink);color:#fff}
+  .day .dots{position:absolute;bottom:5px;left:0;right:0;display:flex;justify-content:center;gap:3px}
+  .day .dots i{width:6px;height:6px;border-radius:50%;box-shadow:0 0 0 1.5px #fff}
+  .legend{display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+  .legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .daytitle{font-weight:900;font-size:15px;margin-bottom:8px}
+  .dgroup+.dgroup{margin-top:12px}
+  .dgroup .who:empty{display:none}
+  .pdot{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--c)}
+  .pdot::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:1px}
+  .daylist{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+  .daylist .g+.g{margin-top:10px}
+  .bigstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+  footer{text-align:center;font-size:12px;color:var(--muted);margin-top:18px}
+</style>
+</head>
+<body>
+<div class="hero"><div class="in">
+  <h1>Burger Family<br>Baseball</h1>
+  <div class="tag2">Jared &amp; Jaxon · 2027 Season</div>
+</div></div>
+
+<div class="sheet"><div class="wrap">
+  <nav>
+    <button data-view="home" class="on">Home</button>
+    <button data-view="schedule">Schedule</button>
+    <button data-view="stats">Stats</button>
+  </nav>
+  <div class="updated" id="updated"></div>
+  <section class="view on" id="home">
+    <div id="playerCards"></div>
+    <div class="card"><h2>Next Games</h2><div id="nextGames"></div></div>
+    <div class="card"><h2>Previous Games</h2><div id="prevGames"></div></div>
+    <div class="card"><h2>Media Talk</h2><div id="media"></div></div>
+  </section>
+
+  <section class="view" id="schedule">
+    <div class="seg" id="schedSeg"></div>
+    <div class="modebar"><div class="mode" id="schedMode">
+      <button data-m="list"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h9M5 8h9M5 12h9M2 4h0M2 8h0M2 12h0"/></svg>List</button>
+      <button data-m="cal"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5 1.5v3M11 1.5v3"/></svg>Calendar</button>
+    </div></div>
+    <div class="card" id="schedCard"></div>
+  </section>
+
+  <section class="view" id="stats">
+    <div class="seg" id="statsSeg"></div>
+    <div id="statsBody"></div>
+  </section>
+
+  <footer>Updated automatically after game days · Tap a post to open it on X</footer>
+</div></div>
+
+<!--
+  ===================== DATA =====================
+  The automation only edits this block. Everything above and below is the app itself.
+  Dates are YYYY-MM-DD. Pitching IP uses baseball notation (1.2 = 1 and 2/3 innings).
+-->
+<script id="data" type="application/json">
+{
+  "lastUpdated": "2026-11-06",
+  "players": [
+    {
+      "id": "jared",
+      "name": "Jared Burger",
+      "short": "Jared",
+      "team": "Olney Central College",
+      "teamShort": "Olney Central",
+      "color": "#1f3a68",
+      "tint": "#2f6bd0",
+      "number": "12",
+      "position": "INF",
+      "year": "Freshman",
+      "type": "hitter",
+      "photo": "assets/jared.jpg",
+      "logo": "assets/occ.png",
+      "seasonStart": null
+    },
+    {
+      "id": "jaxon",
+      "name": "Jaxon Lueken",
+      "short": "Jax",
+      "team": "Indiana University",
+      "teamShort": "Indiana",
+      "color": "#990000",
+      "number": "34",
+      "position": "RHP",
+      "year": "Freshman",
+      "type": "pitcher",
+      "photo": "assets/jaxon.jpg",
+      "logo": "assets/iu.svg",
+      "seasonStart": "2027-02-19"
+    }
+  ],
+  "schedules": {
+    "jared": [],
+    "jaxon": [
+      {"date":"2027-02-19","opp":"UTSA","away":true,"location":"San Antonio, TX","time":""},
+      {"date":"2027-02-20","opp":"UTSA","away":true,"location":"San Antonio, TX","time":""},
+      {"date":"2027-02-20","opp":"UTSA","away":true,"location":"San Antonio, TX","time":""},
+      {"date":"2027-02-21","opp":"UTSA","away":true,"location":"San Antonio, TX","time":""},
+      {"date":"2027-02-26","opp":"UNCW","away":false,"neutral":true,"location":"Spartanburg, SC","time":"1:35 PM"},
+      {"date":"2027-02-27","opp":"Wofford","away":false,"neutral":true,"location":"Spartanburg, SC","time":"6:05 PM"},
+      {"date":"2027-02-28","opp":"Austin Peay","away":false,"neutral":true,"location":"Spartanburg, SC","time":"10:35 AM"},
+      {"date":"2027-03-02","opp":"NKU","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-03-05","opp":"UAB","away":false,"neutral":true,"location":"Kennesaw, GA","time":""},
+      {"date":"2027-03-06","opp":"Kennesaw State","away":false,"neutral":true,"location":"Kennesaw, GA","time":""},
+      {"date":"2027-03-06","opp":"Kennesaw State","away":false,"neutral":true,"location":"Kennesaw, GA","time":""},
+      {"date":"2027-03-07","opp":"UAB","away":false,"neutral":true,"location":"Kennesaw, GA","time":""},
+      {"date":"2027-03-09","opp":"Wright State","away":true,"location":"Dayton, OH","time":""},
+      {"date":"2027-03-12","opp":"USF","away":true,"location":"Tampa, FL","time":""},
+      {"date":"2027-03-13","opp":"USF","away":true,"location":"Tampa, FL","time":""},
+      {"date":"2027-03-14","opp":"USF","away":true,"location":"Tampa, FL","time":""},
+      {"date":"2027-03-16","opp":"Xavier","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-03-19","opp":"Nebraska","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-03-20","opp":"Nebraska","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-03-21","opp":"Nebraska","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-03-23","opp":"Evansville","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-03-26","opp":"Rutgers","away":true,"location":"Piscataway, NJ","time":""},
+      {"date":"2027-03-27","opp":"Rutgers","away":true,"location":"Piscataway, NJ","time":""},
+      {"date":"2027-03-28","opp":"Rutgers","away":true,"location":"Piscataway, NJ","time":""},
+      {"date":"2027-04-02","opp":"Minnesota","away":true,"location":"Minneapolis, MN","time":""},
+      {"date":"2027-04-03","opp":"Minnesota","away":true,"location":"Minneapolis, MN","time":""},
+      {"date":"2027-04-04","opp":"Minnesota","away":true,"location":"Minneapolis, MN","time":""},
+      {"date":"2027-04-06","opp":"Ball State","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-09","opp":"Oregon","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-10","opp":"Oregon","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-11","opp":"Oregon","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-13","opp":"Indiana State","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-16","opp":"Penn State","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-17","opp":"Penn State","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-18","opp":"Penn State","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-04-20","opp":"Ball State","away":false,"neutral":true,"location":"Victory Field, Indianapolis","time":""},
+      {"date":"2027-04-23","opp":"USC","away":true,"location":"Los Angeles, CA","time":""},
+      {"date":"2027-04-24","opp":"USC","away":true,"location":"Los Angeles, CA","time":""},
+      {"date":"2027-04-25","opp":"USC","away":true,"location":"Los Angeles, CA","time":""},
+      {"date":"2027-04-28","opp":"Xavier","away":true,"location":"Cincinnati, OH","time":""},
+      {"date":"2027-04-30","opp":"Purdue","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-01","opp":"Purdue","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-02","opp":"Purdue","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-07","opp":"Michigan State","away":true,"location":"East Lansing, MI","time":""},
+      {"date":"2027-05-08","opp":"Michigan State","away":true,"location":"East Lansing, MI","time":""},
+      {"date":"2027-05-09","opp":"Michigan State","away":true,"location":"East Lansing, MI","time":""},
+      {"date":"2027-05-11","opp":"Louisville","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-14","opp":"Ohio State","away":true,"location":"Columbus, OH","time":""},
+      {"date":"2027-05-15","opp":"Ohio State","away":true,"location":"Columbus, OH","time":""},
+      {"date":"2027-05-16","opp":"Ohio State","away":true,"location":"Columbus, OH","time":""},
+      {"date":"2027-05-18","opp":"Indiana State","away":true,"location":"Terre Haute, IN","time":""},
+      {"date":"2027-05-20","opp":"Maryland","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-21","opp":"Maryland","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-22","opp":"Maryland","away":false,"location":"Bart Kaufman Field, Bloomington","time":""},
+      {"date":"2027-05-24","opp":"Big Ten Tournament (May 24–30)","away":false,"neutral":true,"location":"Omaha, NE","time":""}
+    ]
+  },
+  "gameLogs": {
+    "jared": [],
+    "jaxon": []
+  },
+  "media": [
+    {"date":"2026-10-06","player":"jared","source":"x","account":"Prep Baseball Tennessee","handle":"PrepBaseballTN",
+     "text":"FR Jared Burger \n\nBarrels this pitch to the pull side. Athletic frame with some twitch. Strong hands.\n\n@PB_JUCO //@USAStadium //@OCCBSB",
+     "url":"https://x.com/PrepBaseballTN/status/2107324528640545019"},
+    {"date":"2026-10-04","player":"jaxon","source":"x","account":"iubase.com","handle":"iubase17",
+     "text":"Jaxon Lueken throws a perfect 10th including snagging a ball hit right at hit to end the frame \n\n19-6 IU B10 \n\n#iubase | @JaxLueken",
+     "url":"https://x.com/iubase17/status/2106858604171251965"},
+    {"date":"2026-09-19","player":"jared","source":"x","account":"ScoutConnect","handle":"ScoutConnectBB",
+     "text":"Another 100 mph EV swing from FR INF Jared Burger (@OCCBSB).\n\n#SCJuco",
+     "url":"https://x.com/ScoutConnectBB/status/2101443027801637093"},
+    {"date":"2026-09-19","player":"jared","source":"x","account":"ScoutConnect","handle":"ScoutConnectBB",
+     "text":"FR INF Jared Burger (@OCCBSB) take this fastball the other way for a 100 MPH ground rule double.\n\n#SCJuco",
+     "url":"https://x.com/ScoutConnectBB/status/2101432861962240223"},
+    {"date":"2026-08-26","player":"jaxon","source":"x","account":"Kris Norton","handle":"KrisNortonRadio",
+     "text":"Forest Park’s Jaxon Lueken will wear #34 for the Hoosiers",
+     "url":"https://x.com/KrisNortonRadio/status/2092688522071208336"}
+  ]
+}
+</script>
+
+<script>
+const D = JSON.parse(document.getElementById('data').textContent);
+const P = Object.fromEntries(D.players.map(p => [p.id, p]));
+const today = new Date(); today.setHours(0,0,0,0);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const d = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
+const fmt = (s, o={weekday:'short', month:'short', day:'numeric'}) => d(s).toLocaleDateString('en-US', o);
+const vs = g => g.neutral ? 'vs' : (g.away ? '@' : 'vs');
+
+/* ---------- stats math ---------- */
+const outs = ip => { const [w, f='0'] = String(ip).split('.'); return (+w)*3 + (+f); };
+const ipStr = o => `${Math.floor(o/3)}.${o%3}`;
+function seasonTotals(p){
+  const log = D.gameLogs[p.id] || [];
+  if (p.type === 'pitcher'){
+    const t = {G:log.length, o:0, H:0, R:0, ER:0, BB:0, K:0, W:0, L:0, SV:0};
+    log.forEach(g => { const l=g.line||{}; t.o+=outs(l.ip||0); ['H','R','ER','BB','K'].forEach(k=>t[k]+=+(l[k.toLowerCase()]||0));
+      if (l.dec==='W') t.W++; if (l.dec==='L') t.L++; if (l.dec==='S') t.SV++; });
+    t.IP = ipStr(t.o); t.ERA = t.o ? (t.ER*27/t.o).toFixed(2) : '—';
+    t.WHIP = t.o ? ((t.BB+t.H)*3/t.o).toFixed(2) : '—';
+    return t;
+  } else {
+    const t = {G:log.length, AB:0, R:0, H:0, '2B':0, '3B':0, HR:0, RBI:0, BB:0, K:0, SB:0};
+    log.forEach(g => { const l=g.line||{}; Object.keys(t).forEach(k=>{ if(k!=='G') t[k]+=+(l[k.toLowerCase()]||0); }); });
+    const tb = t.H + t['2B'] + 2*t['3B'] + 3*t.HR;
+    const avg = t.AB ? (t.H/t.AB) : null;
+    t.AVG = avg===null ? '—' : avg.toFixed(3).replace(/^0/, '');
+    t.OBP = (t.AB+t.BB) ? ((t.H+t.BB)/(t.AB+t.BB)).toFixed(3).replace(/^0/,'') : '—';
+    t.SLG = t.AB ? (tb/t.AB).toFixed(3).replace(/^0/,'') : '—';
+    return t;
+  }
+}
+const keyStats = p => { const t = seasonTotals(p);
+  return p.type==='pitcher'
+    ? [['ERA',t.ERA],['IP',t.IP],['K',t.K],['W-L',`${t.W}-${t.L}`]]
+    : [['AVG',t.AVG],['H',t.H],['HR',t.HR],['RBI',t.RBI]]; };
+const lineText = (p,l) => p.type==='pitcher'
+  ? `${l.ip} IP, ${l.h} H, ${l.r} R, ${l.er} ER, ${l.bb} BB, ${l.k} K${l.dec?` · ${l.dec}`:''}`
+  : `${l.h}-for-${l.ab}${l.hr?`, ${l.hr} HR`:''}${l['2b']?`, ${l['2b']} 2B`:''}${l['3b']?`, ${l['3b']} 3B`:''}${l.rbi?`, ${l.rbi} RBI`:''}${l.r?`, ${l.r} R`:''}${l.bb?`, ${l.bb} BB`:''}${l.sb?`, ${l.sb} SB`:''}`;
+
+/* ---------- home ---------- */
+function photoHTML(p){
+  const initials = p.name.split(' ').map(w=>w[0]).join('');
+  const photo = p.photo ? `style="background-image:url('${esc(p.photo)}')"` : '';
+  const logo = p.logo ? `<span class="logo" style="background-image:url('${esc(p.logo)}')"></span>` : '';
+  return `<div class="photo" ${photo}>${p.photo?'':initials}${logo}</div>`;
+}
+const metaHTML = p => [p.number?`<b>#${esc(p.number)}</b>`:'', esc(p.position), esc(p.year), esc(p.team)].filter(Boolean).join(' · ');
+function playerCard(p){
+  const meta = [p.number?`<b>#${esc(p.number)}</b>`:'', esc(p.position), esc(p.year), esc(p.teamShort)].filter(Boolean).join(' · ');
+  return `<div class="card player" style="--team:${p.color}">
+    ${photoHTML(p)}
+    <div class="pinfo"><div class="pname">${esc(p.name)}</div><div class="pmeta">${meta}</div>
+    <div class="statrow">${keyStats(p).map(([l,v])=>`<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('')}</div></div></div>`;
+}
+function nextGame(p){ return (D.schedules[p.id]||[]).find(g => d(g.date) >= today); }
+function renderHome(){
+  $('#playerCards').innerHTML = D.players.map(playerCard).join('');
+  $('#nextGames').innerHTML = D.players.map(p => {
+    const g = nextGame(p);
+    const body = g
+      ? `<div class="game"><div class="top">${fmt(g.date)} · ${vs(g)} ${esc(g.opp)}</div>
+         <div class="meta">${g.time?esc(g.time)+' ET':'Time TBA'} · ${esc(g.location)}</div></div>`
+      : `<div class="empty">${(D.schedules[p.id]||[]).length ? 'Season complete' : '2027 schedule coming soon'}</div>`;
+    return `<div class="block" style="--team:${p.color}"><div class="who">${esc(p.short)} · ${esc(p.teamShort)}</div>${body}</div>`;
+  }).join('');
+  $('#prevGames').innerHTML = D.players.map(p => {
+    const log = [...(D.gameLogs[p.id]||[])].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+    const g1 = (D.schedules[p.id]||[])[0];
+    const body = log.length ? log.map(g => `<div class="prev">
+        <div class="top"><span class="res ${esc((g.result||'')[0])}">${esc(g.result||'')}</span>${fmt(g.date,{month:'short',day:'numeric'})} ${g.away?'@':'vs'} ${esc(g.opp)}</div>
+        <div class="line">${g.line ? lineText(p,g.line) : 'Did not play'}</div></div>`).join('')
+      : `<div class="empty">No games yet${g1?` · opener ${fmt(g1.date,{month:'short',day:'numeric'})} ${vs(g1)} ${esc(g1.opp)}`:''}</div>`;
+    return `<div class="block" style="--team:${p.color}"><div class="who">${esc(p.short)}</div>${body}</div>`;
+  }).join('');
+  const posts = [...D.media].sort((a,b)=>b.date.localeCompare(a.date));
+  $('#media').innerHTML = posts.length ? posts.map(m => {
+    const p = P[m.player] || {};
+    const label = m.source==='x' ? '𝕏' : m.source==='grok' ? 'Grok' : 'News';
+    const who = m.handle ? `${esc(m.account)} <span style="color:var(--muted)">@${esc(m.handle)}</span>` : esc(m.account);
+    return `<div class="post" style="--team:${p.color||'#333'}">
+      <div class="phead"><span class="badge ${m.source}">${label}</span><span class="acct">${who}</span><span class="date">${fmt(m.date,{month:'short',day:'numeric'})}</span></div>
+      ${m.title?`<div class="ptext"><b>${esc(m.title)}</b></div>`:''}
+      <div class="ptext">${esc(m.text)}</div>
+      <span class="tag">${esc(p.short||'')}</span> · <a href="${esc(m.url)}" target="_blank" rel="noopener">${m.source==='x'?'View on X':'Read more'} →</a></div>`;
+  }).join('') : '<div class="empty">Nothing yet.</div>';
+}
+
+/* ---------- schedule ---------- */
+let schedFor = 'both', statsFor = D.players[0].id;
+const BOTH = {id:'both', short:'Both', teamShort:'', color:'#14213d', tint:'#6b7fa8'};
+function seg(el, cur, onPick, withBoth){
+  const opts = (withBoth ? [BOTH] : []).concat(D.players);
+  el.innerHTML = opts.map(p=>`<button data-id="${p.id}" style="--team:${p.color};--tint:${p.tint||p.color}" class="${p.id===cur?'on':''}">${esc(p.short)}${p.teamShort && !withBoth?' · '+esc(p.teamShort):''}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => onPick(b.dataset.id));
+}
+let schedMode = 'list', calYM = null, calSel = null;
+function ymOf(s){ const [y,m] = s.split('-').map(Number); return y*12 + (m-1); }
+/* every scheduled game for the chosen player(s), with its box-score line attached once played */
+function entriesFor(ids){
+  const out = [];
+  ids.forEach(id => {
+    const p = P[id], logs = {};
+    (D.gameLogs[id]||[]).forEach(g => (logs[g.date] ||= []).push(g));
+    (D.schedules[id]||[]).forEach(g => out.push({p, g, done:(logs[g.date]||[]).shift()}));
+  });
+  return out.sort((a,b) => a.g.date.localeCompare(b.g.date) || D.players.indexOf(a.p) - D.players.indexOf(b.p));
+}
+function renderSchedule(){
+  seg($('#schedSeg'), schedFor, id => { schedFor=id; calYM=null; calSel=null; renderSchedule(); }, true);
+  document.querySelectorAll('#schedMode button').forEach(b => { b.classList.toggle('on', b.dataset.m===schedMode);
+    b.onclick = () => { schedMode = b.dataset.m; renderSchedule(); }; });
+  const both = schedFor==='both', ids = both ? D.players.map(p=>p.id) : [schedFor], sel = both ? BOTH : P[schedFor];
+  const card = $('#schedCard'); card.style.setProperty('--team', sel.color); card.style.setProperty('--tint', sel.tint||sel.color);
+  const E = entriesFor(ids);
+  const missing = ids.filter(id => !(D.schedules[id]||[]).length).map(id => P[id]);
+  const note = missing.length ? `<div class="empty" style="margin-bottom:10px">${missing.map(p=>esc(p.short)).join(' & ')}'s 2027 schedule hasn't been added yet.</div>` : '';
+  if (!E.length){ card.innerHTML = note; return; }
+  if (schedMode==='cal') return renderCalendar(E, both, note);
+  const nextFor = {}; ids.forEach(id => { const n = nextGame(P[id]); if (n) nextFor[id] = n; });
+  let month = '';
+  const rows = E.map(({p,g,done}) => {
+    const m = fmt(g.date,{month:'long'}); let hdr = '';
+    if (m!==month){ month=m; hdr = `<tr class="monthhdr"><td colspan="3">${m}</td></tr>`; }
+    const cls = d(g.date) < today ? 'past' : (nextFor[p.id]===g ? 'next' : '');
+    const right = done?.result ? `<span class="res ${esc(done.result[0])}">${esc(done.result)}</span>` : esc(g.time||'TBA');
+    const who = both ? `<div class="pdot" style="--c:${p.color}">${esc(p.short)}</div>` : '';
+    return hdr + `<tr class="${cls}" style="--team:${p.color}"><td>${fmt(g.date,{weekday:'short',month:'numeric',day:'numeric'})}</td>
+      <td>${who}<b>${vs(g)} ${esc(g.opp)}</b><div class="line">${esc(g.location)}</div></td><td class="n">${right}</td></tr>`;
+  }).join('');
+  card.innerHTML = note + `<table>${rows}</table>`;
+}
+
+function gameRowHTML(p,g,done){
+  const right = done?.result ? `<span class="res ${esc(done.result[0])}">${esc(done.result)}</span>` : esc(g.time? g.time+' ET':'Time TBA');
+  const line = done?.line ? `<div class="line">${lineText(p,done.line)}</div>` : '';
+  return `<div class="g"><div class="top" style="display:flex;justify-content:space-between;gap:8px"><b>${vs(g)} ${esc(g.opp)}</b><span>${right}</span></div>
+    <div class="line">${esc(g.location)}</div>${line}</div>`;
+}
+function renderCalendar(E, both, note){
+  const byDate = {}; E.forEach(e => (byDate[e.g.date] ||= []).push(e));
+  const upcoming = E.find(e => d(e.g.date) >= today);
+  const minYM = ymOf(E[0].g.date), maxYM = ymOf(E[E.length-1].g.date);
+  if (calYM===null) calYM = Math.min(Math.max(ymOf((upcoming||E[E.length-1]).g.date), minYM), maxYM);
+  if (calSel===null){ const t = upcoming || E[0]; if (ymOf(t.g.date)===calYM) calSel = t.g.date; }
+  const y = Math.floor(calYM/12), m = calYM%12, first = new Date(y,m,1), days = new Date(y,m+1,0).getDate();
+  const pad = n => String(n).padStart(2,'0'), todayKey = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  let cells = ['S','M','T','W','T','F','S'].map(x=>`<div class="dow">${x}</div>`).join('');
+  for (let i=0;i<first.getDay();i++) cells += '<div class="day blank"></div>';
+  for (let dd=1; dd<=days; dd++){
+    const key = `${y}-${pad(m+1)}-${pad(dd)}`, es = byDate[key];
+    const cls = ['day']; if (es) cls.push('game', both?'multi':''); if (es && d(key)<today) cls.push('past');
+    if (upcoming && upcoming.g.date===key) cls.push('next'); if (calSel===key) cls.push('sel'); if (key===todayKey) cls.push('today');
+    let extra = '';
+    if (es && both){
+      const ps = D.players.filter(p => es.some(e=>e.p===p));
+      extra = `<span class="dots">${ps.map(p=>`<i style="background:${p.color}"></i>`).join('')}</span>`;
+    } else if (es){
+      if (es.length>1) extra += `<span class="dh">×${es.length}</span>`;
+      const r = es.filter(e=>e.done?.result).map(e=>esc(e.done.result[0])).join(' ');
+      if (r) extra += `<span class="r">${r}</span>`;
+    }
+    cells += es ? `<button class="${cls.join(' ')}" data-k="${key}">${dd}${extra}</button>` : `<div class="${cls.join(' ')}">${dd}</div>`;
+  }
+  let list;
+  if (calSel && byDate[calSel]){
+    const groups = D.players.map(p => [p, byDate[calSel].filter(e=>e.p===p)]).filter(([,es])=>es.length);
+    list = `<div class="daylist"><div class="daytitle">${fmt(calSel,{weekday:'long',month:'long',day:'numeric'})}</div>` +
+      groups.map(([p,es]) => `<div class="dgroup" style="--team:${p.color}">
+        <div class="who">${both?esc(p.short)+' · '+esc(p.teamShort):''}${es.length>1?(both?' · ':'')+'Doubleheader':''}</div>
+        ${es.map(e=>gameRowHTML(p,e.g,e.done)).join('')}</div>`).join('') + `</div>`;
+  } else list = `<div class="daylist empty">Tap a highlighted day to see the game${both?'s':''}.</div>`;
+  const legend = both ? `<div class="legend">${D.players.map(p=>`<span><i style="background:${p.color}"></i>${esc(p.short)}</span>`).join('')}</div>` : '';
+  const mname = first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  $('#schedCard').innerHTML = note + `<div class="calhead"><button id="calPrev" ${calYM<=minYM?'disabled':''} aria-label="Previous month">‹</button>
+    <div class="m">${mname}</div><button id="calNext" ${calYM>=maxYM?'disabled':''} aria-label="Next month">›</button></div>
+    <div class="grid">${cells}</div>${legend}${list}`;
+  $('#calPrev').onclick = () => { calYM--; calSel=null; renderSchedule(); };
+  $('#calNext').onclick = () => { calYM++; calSel=null; renderSchedule(); };
+  document.querySelectorAll('#schedCard .day.game').forEach(b => b.onclick = () => { calSel = b.dataset.k; renderSchedule(); });
+}
+
+/* ---------- stats ---------- */
+function renderStats(){
+  seg($('#statsSeg'), statsFor, id => { statsFor=id; renderStats(); });
+  const p = P[statsFor], t = seasonTotals(p), log = [...(D.gameLogs[p.id]||[])].sort((a,b)=>a.date.localeCompare(b.date));
+  const big = p.type==='pitcher'
+    ? [['ERA',t.ERA],['IP',t.IP],['K',t.K],['W-L',`${t.W}-${t.L}`],['G',t.G],['BB',t.BB],['H',t.H],['WHIP',t.WHIP]]
+    : [['AVG',t.AVG],['OBP',t.OBP],['SLG',t.SLG],['G',t.G],['H',t.H],['HR',t.HR],['RBI',t.RBI],['SB',t.SB]];
+  const cols = p.type==='pitcher' ? ['ip','h','r','er','bb','k'] : ['ab','r','h','2b','hr','rbi','bb','k'];
+  const table = log.length ? `<div class="scroll"><table><tr><th>Date</th><th>Opp</th>${cols.map(c=>`<th class="n">${c.toUpperCase()}</th>`).join('')}</tr>
+    ${log.map(g=>`<tr><td>${fmt(g.date,{month:'numeric',day:'numeric'})}</td><td>${g.away?'@':'vs'} ${esc(g.opp)}<div class="line">${esc(g.result||'')}</div></td>
+      ${cols.map(c=>`<td class="n">${g.line? esc(g.line[c]??0) : '–'}</td>`).join('')}</tr>`).join('')}</table></div>`
+    : `<div class="empty">Game-by-game stats will show up here after ${esc(p.short)}'s first game.</div>`;
+  $('#statsBody').innerHTML = `<div class="card" style="--team:${p.color}">
+    <div class="player" style="margin-bottom:14px">${photoHTML(p)}<div class="pinfo"><div class="pname">${esc(p.name)}</div>
+      <div class="pmeta" style="margin:2px 0 0">${metaHTML(p)}</div></div></div>
+    <h2>2027 Season</h2>
+    <div class="bigstats">${big.map(([l,v])=>`<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('')}</div></div>
+    <div class="card"><h2>Game Log</h2>${table}</div>`;
+}
+
+/* ---------- nav ---------- */
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on', x===b));
+  document.querySelectorAll('section.view').forEach(s=>s.classList.toggle('on', s.id===b.dataset.view));
+  window.scrollTo({top:document.querySelector('.sheet').offsetTop-10,behavior:'smooth'});
+});
+/* day photo 8:00 AM – 6:00 PM, night photo 6:01 PM – 7:59 AM (viewer's local time) */
+function setHero(){ const n = new Date(), mins = n.getHours()*60 + n.getMinutes();
+  document.querySelector('.hero').classList.toggle('night', !(mins >= 480 && mins <= 1080)); }
+setHero(); setInterval(setHero, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setHero(); });
+$('#updated').textContent = 'Last updated ' + fmt(D.lastUpdated,{month:'long',day:'numeric',year:'numeric'});
+renderHome(); renderSchedule(); renderStats();
+</script>
+</body>
+</html>
